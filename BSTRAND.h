@@ -11,14 +11,17 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <time.h>
+
+#define DEBUG 1
 
 namespace cop3530 {
     
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    class BSTROOT {
+    class BSTRAND {
     public:
-        BSTROOT();  // constructor
-        ~BSTROOT(); // destructor
+        BSTRAND();  // constructor
+        ~BSTRAND(); // destructor
         
         void insert(K key, V value);
         void remove(K key);
@@ -42,7 +45,7 @@ namespace cop3530 {
         Node* root;
         int tree_size;
         
-        Node* insert_leaf(Node* curr, K key, V value);
+        void insert_leaf(Node* curr, K key, V value);
         Node* insert_root(Node* curr, K key, V value);
         Node* remove(Node* curr, K key);
         V& lookup(Node* curr, K key);
@@ -52,13 +55,13 @@ namespace cop3530 {
         Node* rotate_right(Node* curr);
         Node* rotate_left(Node* curr);
         
-    };  // end of BSTROOT class
+    };  // end of BSTRAND class
     
     /******************************************
      *  constructor
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    BSTROOT<K, V, compare, is_equal>::BSTROOT() {
+    BSTRAND<K, V, compare, is_equal>::BSTRAND() {
         root = nullptr;
         tree_size = 0;
     }
@@ -67,7 +70,7 @@ namespace cop3530 {
      *  destructor
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    BSTROOT<K, V, compare, is_equal>::~BSTROOT() {
+    BSTRAND<K, V, compare, is_equal>::~BSTRAND() {
         if (root) {
             clear_tree(root);
         }
@@ -77,12 +80,20 @@ namespace cop3530 {
      *  insert (public)
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    void BSTROOT<K, V, compare, is_equal>::insert(K key, V value) {
+    void BSTRAND<K, V, compare, is_equal>::insert(K key, V value) {
+        
+#ifdef DEBUG
+        srand(2);
+#elif
+        srand((unsigned int)time(NULL));
+#endif
+        
         if (root != nullptr) {
-            srand(time(NULL));
-            if (rand(tree_size+1)) {
-                root = insert_leaf(root, key, value);
+            if (rand()%(tree_size+1)) {
+                //std::cout << "LEAF" << std::endl;
+                insert_leaf(root, key, value);
             } else {
+                //std::cout << "ROOT" << std::endl;
                 root = insert_root(root, key, value);
             }
         } else {
@@ -99,11 +110,11 @@ namespace cop3530 {
      *  remove (public)
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    void BSTROOT<K, V, compare, is_equal>::remove(K key) {
+    void BSTRAND<K, V, compare, is_equal>::remove(K key) {
         if (root != nullptr) {
             root = remove(root, key);
         } else {
-            throw std::runtime_error("BSTLEAF<K, V, compare, is_equal>.remove: TRYING TO REMOVE A KEY FROM AN EMPTY TREE");
+            throw std::runtime_error("BSTRAND<K, V, compare, is_equal>.remove: TRYING TO REMOVE A KEY FROM AN EMPTY TREE");
         }
         tree_size -= 1;
     }
@@ -112,11 +123,11 @@ namespace cop3530 {
      *  lookup (public)
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    V& BSTROOT<K, V, compare, is_equal>::lookup(K key) {
+    V& BSTRAND<K, V, compare, is_equal>::lookup(K key) {
         if (root != nullptr) {
             return lookup(root, key);
         } else {
-            throw std::runtime_error("BSTLEAF<K, V, compare, is_equal>.lookup: TRYING TO LOOKUP A KEY IN AN EMPTY TREE");
+            throw std::runtime_error("BSTRAND<K, V, compare, is_equal>.lookup: TRYING TO LOOKUP A KEY IN AN EMPTY TREE");
         }
     }
     
@@ -124,9 +135,9 @@ namespace cop3530 {
      *  insert_root
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    typename BSTROOT<K, V, compare, is_equal>::Node* BSTROOT<K, V, compare, is_equal>::insert_root(Node* curr, K key, V value) {
+    typename BSTRAND<K, V, compare, is_equal>::Node* BSTRAND<K, V, compare, is_equal>::insert_root(Node* curr, K key, V value) {
         if (is_equal(curr->key, key)) {
-            throw std::runtime_error("BSTROOT<K, V, compare, is_equal>.insert: TRYING TO INSERT WITH A DUPLICATE KEY");
+            throw std::runtime_error("BSTRAND<K, V, compare, is_equal>.insert_root: TRYING TO INSERT WITH A DUPLICATE KEY");
         }else if (compare(curr->key, key)) {    // go right
             if (curr->right == nullptr) {
                 Node* new_node = new Node;
@@ -138,7 +149,7 @@ namespace cop3530 {
                 curr = rotate_left(curr);
                 return curr;
             } else {
-                curr->right = insert(curr->right, key, value);
+                curr->right = insert_root(curr->right, key, value);
                 curr = rotate_left(curr);
                 return curr;
             }
@@ -153,7 +164,7 @@ namespace cop3530 {
                 curr = rotate_right(curr);
                 return curr;
             } else {
-                curr->left = insert(curr->left, key, value);
+                curr->left = insert_root(curr->left, key, value);
                 curr = rotate_right(curr);
                 return curr;
             }
@@ -164,9 +175,9 @@ namespace cop3530 {
      *  insert_leaf
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    void BSTLEAF<K, V, compare, is_equal>::insert_leaf(Node* curr, K key, V value) {
+    void BSTRAND<K, V, compare, is_equal>::insert_leaf(Node* curr, K key, V value) {
         if (is_equal(curr->key, key)) {
-            throw std::runtime_error("BSTLEAF<K, V, compare, is_equal>.insert: TRYING TO INSERT WITH A DUPLICATE KEY");
+            throw std::runtime_error("BSTRAND<K, V, compare, is_equal>.insert_leaf: TRYING TO INSERT WITH A DUPLICATE KEY");
         }else if (compare(curr->key, key)) {    // go right
             if (curr->right == nullptr) {
                 Node* new_node = new Node;
@@ -176,7 +187,7 @@ namespace cop3530 {
                 new_node->left = nullptr;
                 new_node->right = nullptr;
             } else {
-                insert(curr->right, key, value);
+                insert_leaf(curr->right, key, value);
             }
         } else {    // go left
             if (curr->left == nullptr) {
@@ -187,7 +198,7 @@ namespace cop3530 {
                 new_node->left = nullptr;
                 new_node->right = nullptr;
             } else {
-                insert(curr->left, key, value);
+                insert_leaf(curr->left, key, value);
             }
         }
     }
@@ -196,9 +207,9 @@ namespace cop3530 {
      *  remove (private)
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    typename BSTROOT<K, V, compare, is_equal>::Node* BSTROOT<K, V, compare, is_equal>::remove(Node* curr, K key) {
+    typename BSTRAND<K, V, compare, is_equal>::Node* BSTRAND<K, V, compare, is_equal>::remove(Node* curr, K key) {
         if (!curr) {
-            throw std::runtime_error("BSTLEAF<K, V, compare, is_equal>.remove private: TRYING TO REMOVE A NONEXISTENT KEY");
+            throw std::runtime_error("BSTRAND<K, V, compare, is_equal>.remove private: TRYING TO REMOVE A NONEXISTENT KEY");
         }
         
         if (is_equal(curr->key, key)) {
@@ -236,9 +247,9 @@ namespace cop3530 {
      *  lookup (private)
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    V& BSTROOT<K, V, compare, is_equal>::lookup(Node* curr, K key) {
+    V& BSTRAND<K, V, compare, is_equal>::lookup(Node* curr, K key) {
         if (curr == nullptr) {
-            throw std::runtime_error("BSTLEAF<K, V, compare, is_equal>.lookup: TRYING TO LOOKUP A NONEXISTENT KEY");
+            throw std::runtime_error("BSTRAND<K, V, compare, is_equal>.lookup: TRYING TO LOOKUP A NONEXISTENT KEY");
         }
         
         if (is_equal(curr->key, key)) {
@@ -256,7 +267,7 @@ namespace cop3530 {
      *  clear_tree
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    void BSTROOT<K, V, compare, is_equal>::clear_tree(Node* curr) {
+    void BSTRAND<K, V, compare, is_equal>::clear_tree(Node* curr) {
         if (curr->left) {
             clear_tree(curr->left);
         }
@@ -272,7 +283,7 @@ namespace cop3530 {
      *  search_left
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    typename BSTROOT<K, V, compare, is_equal>::Node* BSTROOT<K, V, compare, is_equal>::search_left(Node* curr) {
+    typename BSTRAND<K, V, compare, is_equal>::Node* BSTRAND<K, V, compare, is_equal>::search_left(Node* curr) {
         while (curr->left) {
             curr = curr->left;
         }
@@ -283,7 +294,7 @@ namespace cop3530 {
      *  search_right
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    typename BSTROOT<K, V, compare, is_equal>::Node* BSTROOT<K, V, compare, is_equal>::search_right(Node* curr) {
+    typename BSTRAND<K, V, compare, is_equal>::Node* BSTRAND<K, V, compare, is_equal>::search_right(Node* curr) {
         while (curr->right) {
             curr = curr->right;
         }
@@ -294,7 +305,7 @@ namespace cop3530 {
      *  rotate_right
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    typename BSTROOT<K, V, compare, is_equal>::Node* BSTROOT<K, V, compare, is_equal>::rotate_right(Node* curr) {
+    typename BSTRAND<K, V, compare, is_equal>::Node* BSTRAND<K, V, compare, is_equal>::rotate_right(Node* curr) {
         Node* temp = curr;
         curr = curr->left;
         temp->left = curr->right;
@@ -306,7 +317,7 @@ namespace cop3530 {
      *  rotate_left
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    typename BSTROOT<K, V, compare, is_equal>::Node* BSTROOT<K, V, compare, is_equal>::rotate_left(Node* curr) {
+    typename BSTRAND<K, V, compare, is_equal>::Node* BSTRAND<K, V, compare, is_equal>::rotate_left(Node* curr) {
         Node* temp = curr;
         curr = curr->right;
         temp->right = curr->left;
