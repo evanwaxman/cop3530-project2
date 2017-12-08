@@ -21,6 +21,8 @@ namespace cop3530 {
         void remove(K key);
         V& lookup(K key);
         
+        int height(void);
+        
         
     private:
         struct Node {
@@ -36,6 +38,7 @@ namespace cop3530 {
         void insert(Node* curr, K key, V value);
         Node* remove(Node* curr, K key);
         V& lookup(Node* curr, K key);
+        int height(Node* curr);
         void clear_tree(Node* curr);
         Node* search_left(Node* curr);
         Node* search_right(Node* curr);
@@ -97,6 +100,18 @@ namespace cop3530 {
             return lookup(root, key);
         } else {
             throw std::runtime_error("AVL<K, V, compare, is_equal>.lookup: TRYING TO LOOKUP A KEY IN AN EMPTY TREE");
+        }
+    }
+    
+    /******************************************
+     *  height (public)
+     *****************************************/
+    template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
+    int AVL<K, V, compare, is_equal>::height(void) {
+        if (root != nullptr) {
+            return height(root);
+        } else {
+            throw std::runtime_error("AVL<K, V, compare, is_equal>.height: TRYING TO FIND HEIGHT OF AN EMPTY TREE");
         }
     }
     
@@ -193,6 +208,25 @@ namespace cop3530 {
     }
     
     /******************************************
+     *  height (private)
+     *****************************************/
+    template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
+    int AVL<K, V, compare, is_equal>::height(Node* curr) {
+        if (!curr) {
+            return 0;
+        }
+        
+        int left_height = height(curr->left);
+        int right_height = height(curr->right);
+        
+        if (left_height > right_height) {
+            return (left_height+1);
+        } else {
+            return (right_height+1);
+        }
+    }
+    
+    /******************************************
      *  clear_tree
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
@@ -231,6 +265,6 @@ namespace cop3530 {
     }
     
 }
-    
+
 
 #endif /* AVL_h */
