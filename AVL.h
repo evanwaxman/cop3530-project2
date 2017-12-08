@@ -22,6 +22,7 @@ namespace cop3530 {
         V& lookup(K key);
         
         int height(void);
+        int balance(void);
         
         
     private:
@@ -39,6 +40,7 @@ namespace cop3530 {
         Node* remove(Node* curr, K key);
         V& lookup(Node* curr, K key);
         int height(Node* curr);
+        int balance(Node* curr);
         void clear_tree(Node* curr);
         Node* search_left(Node* curr);
         Node* search_right(Node* curr);
@@ -116,6 +118,18 @@ namespace cop3530 {
     }
     
     /******************************************
+     *  balance (public)
+     *****************************************/
+    template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
+    int AVL<K, V, compare, is_equal>::balance(void) {
+        if (root != nullptr) {
+            return balance(root);
+        } else {
+            throw std::runtime_error("AVL<K, V, compare, is_equal>.balance (public): TRYING TO FIND BALANCE OF AN EMPTY TREE");
+        }
+    }
+    
+    /******************************************
      *  insert (private)
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
@@ -130,6 +144,9 @@ namespace cop3530 {
                 new_node->value = value;
                 new_node->left = nullptr;
                 new_node->right = nullptr;
+                
+                //signed int balance_factor = balance(root);
+                //if (balance_fa)
             } else {
                 insert(curr->right, key, value);
             }
@@ -223,6 +240,28 @@ namespace cop3530 {
             return (left_height+1);
         } else {
             return (right_height+1);
+        }
+    }
+    
+    /******************************************
+     *  balance (private)
+     *****************************************/
+    template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
+    int AVL<K, V, compare, is_equal>::balance(Node* curr) {
+        if (curr != nullptr) {
+            int left_height = 0;
+            if (curr->left) {
+                left_height = height(curr->left);
+            }
+            
+            int right_height = 0;
+            if (curr->right) {
+               right_height = height(curr->right);
+            }
+            
+            return (signed int)(left_height - right_height);
+        } else {
+            throw std::runtime_error("AVL<K, V, compare, is_equal>.balance (private): TRYING TO FIND BALANCE OF AN EMPTY TREE");
         }
     }
     
