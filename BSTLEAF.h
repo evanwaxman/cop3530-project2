@@ -14,15 +14,6 @@
 namespace cop3530 {
 
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    struct Node {
-        K key;
-        V value;
-        Node<K, V, compare, is_equal>* left;
-        Node<K, V, compare, is_equal>* right;
-        
-    };  // end of Node struct
-
-    template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
     class BSTLEAF {
     public:
         BSTLEAF();  // constructor
@@ -34,14 +25,22 @@ namespace cop3530 {
         
         
     private:
-        Node<K, V, compare, is_equal>* root;
+        struct Node {
+            K key;
+            V value;
+            Node* left;
+            Node* right;
+            
+        };  // end of Node struct
         
-        void insert(Node<K, V, compare, is_equal>* curr, K key, V value);
-        Node<K, V, compare, is_equal>* remove(Node<K, V, compare, is_equal>* curr, K key);
-        V& lookup(Node<K, V, compare, is_equal>* curr, K key);
-        void clear_tree(Node<K, V, compare, is_equal>* curr);
-        Node<K, V, compare, is_equal>* search_left(Node<K, V, compare, is_equal>* curr);
-        Node<K, V, compare, is_equal>* search_right(Node<K, V, compare, is_equal>* curr);
+        Node* root;
+        
+        void insert(Node* curr, K key, V value);
+        Node* remove(Node* curr, K key);
+        V& lookup(Node* curr, K key);
+        void clear_tree(Node* curr);
+        Node* search_left(Node* curr);
+        Node* search_right(Node* curr);
         
     };  // end of BSTLEAF class
 
@@ -72,7 +71,7 @@ namespace cop3530 {
         if (root != nullptr) {
             insert(root, key, value);
         } else {
-            root = new Node<K, V, compare, is_equal>;
+            root = new Node;
             root->key = key;
             root->value = value;
             root->left = nullptr;
@@ -108,12 +107,12 @@ namespace cop3530 {
      *  insert (private)
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    void BSTLEAF<K, V, compare, is_equal>::insert(Node<K, V, compare, is_equal>* curr, K key, V value) {
+    void BSTLEAF<K, V, compare, is_equal>::insert(Node* curr, K key, V value) {
         if (is_equal(curr->key, key)) {
             throw std::runtime_error("BSTLEAF<K, V, compare, is_equal>.insert: TRYING TO INSERT WITH A DUPLICATE KEY");
         }else if (compare(curr->key, key)) {    // go right
             if (curr->right == nullptr) {
-                Node<K, V, compare, is_equal>* new_node = new Node<K, V, compare, is_equal>;
+                Node* new_node = new Node;
                 curr->right = new_node;
                 new_node->key = key;
                 new_node->value = value;
@@ -124,7 +123,7 @@ namespace cop3530 {
             }
         } else {    // go left
             if (curr->left == nullptr) {
-                Node<K, V, compare, is_equal>* new_node = new Node<K, V, compare, is_equal>;
+                Node* new_node = new Node;
                 curr->left = new_node;
                 new_node->key = key;
                 new_node->value = value;
@@ -140,7 +139,7 @@ namespace cop3530 {
      *  remove (private)
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    Node<K, V, compare, is_equal>* BSTLEAF<K, V, compare, is_equal>::remove(Node<K, V, compare, is_equal>* curr, K key) {
+    typename BSTLEAF<K, V, compare, is_equal>::Node* BSTLEAF<K, V, compare, is_equal>::remove(Node* curr, K key) {
         if (!curr) {
             throw std::runtime_error("BSTLEAF<K, V, compare, is_equal>.remove private: TRYING TO REMOVE A NONEXISTENT KEY");
         }
@@ -151,13 +150,13 @@ namespace cop3530 {
                 curr = nullptr;
                 return curr;
             } else if (curr->left && !curr->right) {
-                Node<K, V, compare, is_equal>* max = search_right(curr->left);
+                Node* max = search_right(curr->left);
                 curr->key = max->key;
                 curr->value = max->value;
                 curr->left = remove(curr->left, curr->key);
                 return curr;
             } else {
-                Node<K, V, compare, is_equal>* min = search_left(curr->right);
+                Node* min = search_left(curr->right);
                 curr->key = min->key;
                 curr->value = min->value;
                 curr->right = remove(curr->right, curr->key);
@@ -180,7 +179,7 @@ namespace cop3530 {
      *  lookup (private)
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    V& BSTLEAF<K, V, compare, is_equal>::lookup(Node<K, V, compare, is_equal>* curr, K key) {
+    V& BSTLEAF<K, V, compare, is_equal>::lookup(Node* curr, K key) {
         if (curr == nullptr) {
             throw std::runtime_error("BSTLEAF<K, V, compare, is_equal>.lookup: TRYING TO LOOKUP A NONEXISTENT KEY");
         }
@@ -200,7 +199,7 @@ namespace cop3530 {
      *  clear_tree
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    void BSTLEAF<K, V, compare, is_equal>::clear_tree(Node<K, V, compare, is_equal>* curr) {
+    void BSTLEAF<K, V, compare, is_equal>::clear_tree(Node* curr) {
         if (curr->left) {
             clear_tree(curr->left);
         }
@@ -216,7 +215,7 @@ namespace cop3530 {
      *  search_left
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    Node<K, V, compare, is_equal>* BSTLEAF<K, V, compare, is_equal>::search_left(Node<K, V, compare, is_equal>* curr) {
+    typename BSTLEAF<K, V, compare, is_equal>::Node* BSTLEAF<K, V, compare, is_equal>::search_left(Node* curr) {
         while (curr->left) {
             curr = curr->left;
         }
@@ -227,7 +226,7 @@ namespace cop3530 {
      *  search_right
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    Node<K, V, compare, is_equal>* BSTLEAF<K, V, compare, is_equal>::search_right(Node<K, V, compare, is_equal>* curr) {
+    typename BSTLEAF<K, V, compare, is_equal>::Node* BSTLEAF<K, V, compare, is_equal>::search_right(Node* curr) {
         while (curr->right) {
             curr = curr->right;
         }
