@@ -35,15 +35,18 @@ namespace cop3530 {
         };  // end of Node struct
         
         Node* root;
+        signed int balance_factor;
         
-        void insert(Node* curr, K key, V value);
+        Node* insert(Node* curr, Node* prev, int orient, K key, V value);
         Node* remove(Node* curr, K key);
         V& lookup(Node* curr, K key);
         int height(Node* curr);
-        int balance(Node* curr);
+        void balance(Node* curr);
         void clear_tree(Node* curr);
         Node* search_left(Node* curr);
         Node* search_right(Node* curr);
+        Node* rotate_right(Node* curr);
+        Node* rotate_left(Node* curr);
         
     };  // end of AVL class
     
@@ -53,6 +56,7 @@ namespace cop3530 {
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
     AVL<K, V, compare, is_equal>::AVL() {
         root = nullptr;
+        balance_factor = 0;
     }
     
     /******************************************
@@ -71,7 +75,7 @@ namespace cop3530 {
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
     void AVL<K, V, compare, is_equal>::insert(K key, V value) {
         if (root != nullptr) {
-            insert(root, key, value);
+            root = insert(root, root, 0, key, value);
         } else {
             root = new Node;
             root->key = key;
@@ -79,6 +83,7 @@ namespace cop3530 {
             root->left = nullptr;
             root->right = nullptr;
         }
+        balance(root);
     }
     
     /******************************************
@@ -123,7 +128,8 @@ namespace cop3530 {
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
     int AVL<K, V, compare, is_equal>::balance(void) {
         if (root != nullptr) {
-            return balance(root);
+            //balance(root);
+            return balance_factor;
         } else {
             throw std::runtime_error("AVL<K, V, compare, is_equal>.balance (public): TRYING TO FIND BALANCE OF AN EMPTY TREE");
         }
@@ -133,7 +139,7 @@ namespace cop3530 {
      *  insert (private)
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    void AVL<K, V, compare, is_equal>::insert(Node* curr, K key, V value) {
+    typename AVL<K, V, compare, is_equal>::Node* AVL<K, V, compare, is_equal>::insert(Node* curr, Node* prev, int orient, K key, V value) {
         if (is_equal(curr->key, key)) {
             throw std::runtime_error("AVL<K, V, compare, is_equal>.insert: TRYING TO INSERT WITH A DUPLICATE KEY");
         }else if (compare(curr->key, key)) {    // go right
@@ -144,11 +150,9 @@ namespace cop3530 {
                 new_node->value = value;
                 new_node->left = nullptr;
                 new_node->right = nullptr;
-                
-                //signed int balance_factor = balance(root);
-                //if (balance_fa)
+                return curr;
             } else {
-                insert(curr->right, key, value);
+                curr->right = insert(curr->right, curr, orient, key, value);
             }
         } else {    // go left
             if (curr->left == nullptr) {
@@ -158,10 +162,37 @@ namespace cop3530 {
                 new_node->value = value;
                 new_node->left = nullptr;
                 new_node->right = nullptr;
+                return curr;
             } else {
-                insert(curr->left, key, value);
+                curr->left = insert(curr->left, curr, orient, key, value);
             }
         }
+        
+        balance(root);
+        
+        // LR rotation
+        if ((balance_factor > 1) && (curr->left->key < key)) {
+            curr->left = rotate_left(curr->left);
+            return rotate_right(curr);
+        }
+        
+        // RL rotation
+        if ((balance_factor < -1) && (curr->right->key > key)) {
+            curr->right = rotate_right(curr->right);
+            return rotate_left(curr);
+        }
+        
+        // LL rotation
+        if ((balance_factor > 1) && (curr->left->key > key)) {
+            return rotate_right(curr);
+        }
+        
+        // RR rotation
+        if ((balance_factor < -1) && (curr->right->key < key)) {
+            return rotate_left(curr);
+        }
+        
+        return curr;
     }
     
     /******************************************
@@ -247,7 +278,7 @@ namespace cop3530 {
      *  balance (private)
      *****************************************/
     template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
-    int AVL<K, V, compare, is_equal>::balance(Node* curr) {
+    void AVL<K, V, compare, is_equal>::balance(Node* curr) {
         if (curr != nullptr) {
             int left_height = 0;
             if (curr->left) {
@@ -259,7 +290,7 @@ namespace cop3530 {
                right_height = height(curr->right);
             }
             
-            return (signed int)(left_height - right_height);
+            balance_factor = (signed)(left_height - right_height);
         } else {
             throw std::runtime_error("AVL<K, V, compare, is_equal>.balance (private): TRYING TO FIND BALANCE OF AN EMPTY TREE");
         }
@@ -303,6 +334,29 @@ namespace cop3530 {
         return curr;
     }
     
+    /******************************************
+     *  rotate_right
+     *****************************************/
+    template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
+    typename AVL<K, V, compare, is_equal>::Node* AVL<K, V, compare, is_equal>::rotate_right(Node* curr) {
+        Node* temp = curr;
+        curr = curr->left;
+        temp->left = curr->right;
+        curr->right = temp;
+        return curr;
+    }
+    
+    /******************************************
+     *  rotate_left
+     *****************************************/
+    template <typename K, typename V, bool (*compare)(const K&, const K&), bool (*is_equal)(const K&, const K&)>
+    typename AVL<K, V, compare, is_equal>::Node* AVL<K, V, compare, is_equal>::rotate_left(Node* curr) {
+        Node* temp = curr;
+        curr = curr->right;
+        temp->right = curr->left;
+        curr->left = temp;
+        return curr;
+    }
 }
 
 
