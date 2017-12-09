@@ -168,7 +168,17 @@ namespace cop3530 {
             }
         }
         
-        balance(root);
+        balance(curr);
+        
+        // LL rotation
+        if ((balance_factor > 1) && (curr->left->key > key)) {
+            return rotate_right(curr);
+        }
+        
+        // RR rotation
+        if ((balance_factor < -1) && (curr->right->key < key)) {
+            return rotate_left(curr);
+        }
         
         // LR rotation
         if ((balance_factor > 1) && (curr->left->key < key)) {
@@ -181,16 +191,7 @@ namespace cop3530 {
             curr->right = rotate_right(curr->right);
             return rotate_left(curr);
         }
-        
-        // LL rotation
-        if ((balance_factor > 1) && (curr->left->key > key)) {
-            return rotate_right(curr);
-        }
-        
-        // RR rotation
-        if ((balance_factor < -1) && (curr->right->key < key)) {
-            return rotate_left(curr);
-        }
+    
         
         return curr;
     }
