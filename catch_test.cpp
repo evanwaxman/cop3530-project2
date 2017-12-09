@@ -14,10 +14,12 @@
 #include "BSTLEAF.h"
 #include "BSTROOT.h"
 #include "BSTRAND.h"
+#include "AVL.h"
 
-#define TEST_BSTLEAF 1
+//#define TEST_BSTLEAF 1
 //#define TEST_BSTROOT 1
 //#define TEST_BSTRAND 1
+#define TEST_AVL 1
 
 using namespace cop3530;
 
@@ -132,6 +134,45 @@ TEST_CASE("Insert components into tree") {
     map->insert(20, 'k');
     REQUIRE( map->lookup(20) == 'k');
     REQUIRE( map->get_root() == 20);
+#elif TEST_AVL
+    std::cout << "------------- TESTING AVL --------------" << std::endl;
+    
+    AVL<int, char, compare, is_equal>* map = new AVL<int, char, compare, is_equal>;
+    
+    map->insert(5,'w');
+    REQUIRE( map->lookup(5) == 'w');
+    std::cout << "HEIGHT = " << map->height() << std::endl;
+    std::cout << "BALANCE = " << map->balance() << std::endl;
+    
+    map->insert(3,'a');
+    REQUIRE( map->lookup(3) == 'a');
+    std::cout << "HEIGHT = " << map->height() << std::endl;
+    std::cout << "BALANCE = " << map->balance() << std::endl;
+    
+    map->insert(9,'e');
+    REQUIRE( map->lookup(9) == 'e');
+    std::cout << "HEIGHT = " << map->height() << std::endl;
+    std::cout << "BALANCE = " << map->balance() << std::endl;
+    
+    map->insert(1,'y');
+    REQUIRE( map->lookup(1) == 'y');
+    std::cout << "HEIGHT = " << map->height() << std::endl;
+    std::cout << "BALANCE = " << map->balance() << std::endl;
+    
+    map->insert(0, 'A');
+    REQUIRE( map->lookup(0) == 'A');
+    std::cout << "HEIGHT = " << map->height() << std::endl;
+    std::cout << "BALANCE = " << map->balance() << std::endl;
+    
+    map->insert(10, 'z');
+    REQUIRE( map->lookup(10) == 'z');
+    std::cout << "HEIGHT = " << map->height() << std::endl;
+    std::cout << "BALANCE = " << map->balance() << std::endl;
+    
+    map->insert(20, 'k');
+    REQUIRE( map->lookup(20) == 'k');
+    std::cout << "HEIGHT = " << map->height() << std::endl;
+    std::cout << "BALANCE = " << map->balance() << std::endl;
 #endif
     
     delete map;
@@ -146,6 +187,8 @@ TEST_CASE("Remove components from tree") {
     BSTROOT<int, char, compare, is_equal>* map = new BSTROOT<int, char, compare, is_equal>;
 #elif TEST_BSTRAND
     BSTRAND<int, char, compare, is_equal>* map = new BSTRAND<int, char, compare, is_equal>;
+#elif TEST_AVL
+    AVL<int, char, compare, is_equal>* map = new AVL<int, char, compare, is_equal>;
 #endif
     
     map->insert(5,'w');
