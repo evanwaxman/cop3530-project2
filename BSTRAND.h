@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define DEBUG 1
+
 
 namespace cop3530 {
     
@@ -84,7 +84,7 @@ namespace cop3530 {
         
 #ifdef DEBUG
         srand(2);
-#elif
+#else
         srand((unsigned int)time(NULL));
 #endif
         

@@ -10,6 +10,8 @@
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include "catch.hpp"
 
+#define DEBUG 1
+
 #include <iostream>
 #include "BSTLEAF.h"
 #include "BSTROOT.h"
@@ -42,6 +44,19 @@ bool is_equal(const int& key1, const int& key2) {
     }
     return false;
 }
+
+/******************************************
+ *  balance_test
+ *****************************************/
+bool balance_test(AVL<int, char, compare, is_equal>* map) {
+    int bf = map->balance();
+    if (bf > -2 && bf < 2) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 
 TEST_CASE("Insert components into tree") {
 
@@ -106,34 +121,28 @@ TEST_CASE("Insert components into tree") {
     std::cout << "------------- TESTING BSTRAND --------------" << std::endl;
     
     BSTRAND<int, char, compare, is_equal>* map = new BSTRAND<int, char, compare, is_equal>;
-    
+
     map->insert(5,'w');
     REQUIRE( map->lookup(5) == 'w');
     REQUIRE( map->get_root() == 5);
     
     map->insert(3,'a');
     REQUIRE( map->lookup(3) == 'a');
-    REQUIRE( map->get_root() == 3);
     
     map->insert(9,'e');
     REQUIRE( map->lookup(9) == 'e');
-    REQUIRE( map->get_root() == 3);
     
     map->insert(1,'y');
     REQUIRE( map->lookup(1) == 'y');
-    REQUIRE( map->get_root() == 3);
     
     map->insert(0, 'A');
     REQUIRE( map->lookup(0) == 'A');
-    REQUIRE( map->get_root() == 3);
     
     map->insert(10, 'z');
     REQUIRE( map->lookup(10) == 'z');
-    REQUIRE( map->get_root() == 3);
     
     map->insert(20, 'k');
     REQUIRE( map->lookup(20) == 'k');
-    REQUIRE( map->get_root() == 20);
 #elif TEST_AVL
     std::cout << "------------- TESTING AVL --------------" << std::endl;
     
@@ -141,38 +150,47 @@ TEST_CASE("Insert components into tree") {
     
     map->insert(5,'w');
     REQUIRE( map->lookup(5) == 'w');
-    std::cout << "HEIGHT = " << map->height() << std::endl;
-    std::cout << "BALANCE = " << map->balance() << std::endl;
+    REQUIRE(balance_test(map) == true);
     
     map->insert(3,'a');
     REQUIRE( map->lookup(3) == 'a');
-    std::cout << "HEIGHT = " << map->height() << std::endl;
-    std::cout << "BALANCE = " << map->balance() << std::endl;
+    REQUIRE(balance_test(map) == true);
     
     map->insert(9,'e');
     REQUIRE( map->lookup(9) == 'e');
-    std::cout << "HEIGHT = " << map->height() << std::endl;
-    std::cout << "BALANCE = " << map->balance() << std::endl;
+    REQUIRE(balance_test(map) == true);
     
     map->insert(1,'y');
     REQUIRE( map->lookup(1) == 'y');
-    std::cout << "HEIGHT = " << map->height() << std::endl;
-    std::cout << "BALANCE = " << map->balance() << std::endl;
+    REQUIRE(balance_test(map) == true);
     
     map->insert(0, 'A');
     REQUIRE( map->lookup(0) == 'A');
-    std::cout << "HEIGHT = " << map->height() << std::endl;
-    std::cout << "BALANCE = " << map->balance() << std::endl;
+    REQUIRE(balance_test(map) == true);
     
     map->insert(10, 'z');
     REQUIRE( map->lookup(10) == 'z');
-    std::cout << "HEIGHT = " << map->height() << std::endl;
-    std::cout << "BALANCE = " << map->balance() << std::endl;
+    REQUIRE(balance_test(map) == true);
     
     map->insert(20, 'k');
     REQUIRE( map->lookup(20) == 'k');
-    std::cout << "HEIGHT = " << map->height() << std::endl;
-    std::cout << "BALANCE = " << map->balance() << std::endl;
+    REQUIRE(balance_test(map) == true);
+    
+    map->insert(13, 'e');
+    REQUIRE( map->lookup(13) == 'e');
+    REQUIRE(balance_test(map) == true);
+    
+    map->insert(11, 'f');
+    REQUIRE( map->lookup(11) == 'f');
+    REQUIRE(balance_test(map) == true);
+    
+    map->insert(8, 'p');
+    REQUIRE( map->lookup(8) == 'p');
+    REQUIRE(balance_test(map) == true);
+    
+    map->insert(7, 'z');
+    REQUIRE( map->lookup(7) == 'z');
+    REQUIRE(balance_test(map) == true);
 #endif
     
     delete map;

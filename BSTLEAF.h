@@ -17,6 +17,11 @@ namespace cop3530 {
     class BSTLEAF {
     public:
         BSTLEAF();  // constructor
+        
+        
+        //root->left = copy(old_root->left)
+        
+        
         ~BSTLEAF(); // destructor
         
         void insert(K key, V value);
